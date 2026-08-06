@@ -1,44 +1,33 @@
-# -*- coding: utf-8 -*-
-"""
-Служебный скрипт: помогает получить постоянный file_id для видео.
-
-Как пользоваться:
-1. Запустите: python get_file_id.py
-2. В Telegram откройте своего бота и отправьте ему видео файлом
-   (как видео, не как файл-документ) — то самое, длинное (171 МБ),
-   через приложение Telegram это можно сделать даже с большим файлом,
-   лимит на ЗАГРУЗКУ в Telegram — 2 ГБ, ограничение 50 МБ действует
-   только на ОТПРАВКУ ботом через API.
-3. В консоли появится file_id — скопируйте его в config.py
-   (VIDEO_ABOUT_FILE_ID или VIDEO_LESSON_FILE_ID).
-4. Остановите скрипт (Ctrl+C) и запускайте обычный bot.py.
-"""
-
 import logging
-
 from telegram import Update
 from telegram.ext import Application, ContextTypes, MessageHandler, filters
 
-import config
+TOKEN = "8582789594:AAEQBRo3D6DvWNF_bMLIpn7zOUmmwzAPszw"
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 
-
-async def on_video(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    video = update.message.video
-    if video:
-        print("\n=== FILE_ID ВИДЕО ===")
-        print(video.file_id)
-        print("======================\n")
-        await update.message.reply_text(f"file_id:\n{video.file_id}")
-
+async def handle_media(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    msg = update.message
+    
+    if msg.photo:
+        # Берём последнее фото из массива (самое высокое разрешение)
+        file_id = msg.photo[-1].file_id
+        await msg.reply_text(f"PHOTO file_id:\n{file_id}")
+        print(f"PHOTO file_id: {file_id}")
+        
+    elif msg.video:
+        file_id = msg.video.file_id
+        await msg.reply_text(f"VIDEO file_id:\n{file_id}")
+        print(f"VIDEO file_id: {file_id}")
 
 def main():
-    app = Application.builder().token(config.BOT_TOKEN).build()
-    app.add_handler(MessageHandler(filters.VIDEO, on_video))
-    print("Ожидаю видео от вас в Telegram... (Ctrl+C для остановки)")
+    print("Ожидаю медиафайлы (фото и видео) от вас в Telegram... (Ctrl+C для остановки)")
+    app = Application.builder().token(TOKEN).build()
+    
+    # Обрабатываем и фото, и видео
+    app.add_handler(MessageHandler(filters.PHOTO | filters.VIDEO, handle_media))
+    
     app.run_polling()
-
 
 if __name__ == "__main__":
     main()

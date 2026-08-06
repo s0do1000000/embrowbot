@@ -32,7 +32,51 @@ WORKS_MEDIA = [
     {"type": "video", "file_id": "BAACAgIAAxkBAAIBa2p0xKpudDQiB5g4WmE2k4wIvRwQAALuqwACAQioS116B1VdD_FXPQQ"},
     {"type": "video", "file_id": "BAACAgIAAxkBAAIBbGp0xKqQo_TNgLYxzHVuD-dnln8RAALvqwACAQioS28Zo_BoTZKlPQQ"},
 ]
+# ============================================================
+# МЕДИА ДЛЯ РАЗДЕЛА "РАБОТЫ УЧЕНИКОВ"
+# ============================================================
+WORKS_MEDIA = [
+    # Видео
+    {"type": "video", "file_id": "BAACAgIAAxkBAAIBamp0xKppSI1rZxFZYSvHO44ic4aOAALtqwACAQioS8f37phu3na7PQQ"},
+    {"type": "video", "file_id": "BAACAgIAAxkBAAIBa2p0xKpudDQiB5g4WmE2k4wIvRwQAALuqwACAQioS116B1VdD_FXPQQ"},
+    {"type": "video", "file_id": "BAACAgIAAxkBAAIBbGp0xKqQo_TNgLYxzHVuD-dnln8RAALvqwACAQioS28Zo_BoTZKlPQQ"},
 
+    # Фотографии
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBWGp0xJ_Rhr93kAmfQJfWSxwegd82AAKEG2sbEMmhS0HDKnNJyWFKAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBWWp0xJ-e4-13IirMvMSR06PBHibnAAJ0G2sbEMmhS9f8U6rzqb7ZAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBWmp0xJ8-iBNFpVc5WeqjGsYvp_lEAAJ1G2sbEMmhS9jFYWUZhHhfAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBW2p0xJ8Jb-SEh-p1CaMgaiI2_3AlAAJ2G2sbEMmhS7bkBIx9nF76AQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBSmp0xJyCnhtFzLXgkGAzP-4fB-rKAAJ3G2sbEMmhSzii6ou30dSDAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBS2p0xJwIEcApAoDgomiei9Bbxe4kAAJ4G2sbEMmhSyg7aut8CKOHAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBTGp0xJxquyE4WOWQ1NXNX62pMC5pAAJ5G2sbEMmhS-8-W5ewBo0CAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBTWp0xJxFmdBqVur_8rmlKqp_aKcEAAJ6G2sbEMmhSxCL2ni-zm9jAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBTmp0xJzX3xIknRj_eQTkba1uB2T-AAJ7G2sbEMmhS2YxRxh613OHAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBT2p0xJyzP646VB1fltnVIrtcuH6HAAJ8G2sbEMmhS-HSBbaufrtOAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBUGp0xJwYgCO0anE1vlOePFZkBzQbAAJ9G2sbEMmhSzpWO54nafYuAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBUWp0xJwmcaB7qPGxbA_4Cktlkkx0AAJ-G2sbEMmhS06RBDmC9Ww-AQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBU2p0xJzcdKqA2HNoZPUzpsJkpUQeAAJ_G2sbEMmhSyOghOsl3pdeAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBVGp0xJ9v8zZjOkq2pOF0kjVmO6ZCAAKAG2sbEMmhS8pXeY9QrTJUAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBVWp0xJ8AAURhARQ79pBQtoSYxiDiWQACgRtrGxDJoUsdgdOJB2VV_QEAAwIAA3kAAz0E"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBVmp0xJ9I2DUar44v5OSwWWVfF22oAAKCG2sbEMmhS4ztVZl_PiR9AQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBV2p0xJ8f-kZr1-oEAeQkBoStEggZAAKDG2sbEMmhS7jc8vPiFI6bAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBXGp0xJ8r07TSpQbHyk63PUU3pPxLAAKFG2sbEMmhS3y1Z1YQzdY-AQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBXWp0xJ_HtVFSOMQhQfmmnmnT8NwdAAKGG2sbEMmhSz2j23jX13xVAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBXmp0xKFoaC_Syh5qJ_SdWzqfepkzAAKHG2sbEMmhSzG8f6DNSvI1AQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBX2p0xKE2aEWyPBFrFXMmJa_fI9-2AAKIG2sbEMmhS97E38RzhAABlAEAAwIAA3kAAz0E"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBYGp0xKFOJhGXH5wdtlJWGbRcXPjzAAKJG2sbEMmhS6PS95g5Dj2wAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBYWp0xKHEr8TFnf6p3G0wht2zWTupAAKKG2sbEMmhS2ewhPRkZji2AQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBYmp0xKE1WemAOdBB895OkrUtpRaFAAKLG2sbEMmhSzOtrkekMzlxAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBY2p0xKH_k468nD9godZ3C1nGwMRVAAKMG2sbEMmhS8w9x3G2uhBeAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBZGp0xKHpDkfx8OyqFA2Isx4pVUHdAAKNG2sbEMmhSzOEhTEo8FkAAQEAAwIAA3kAAz0E"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBZWp0xKEGZuatU06J-8b7Cjt3qUGhAAKOG2sbEMmhS81JqOnk09oQAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBZmp0xKE2UgWhs5ZSEaaFQUHWwrr9AAKPG2sbEMmhSyM5llZ-EoPGAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBZ2p0xKHdRVO3rw9E6yo7F5Ji8W3oAAKQG2sbEMmhS7VdWd8hbftIAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBaGp0xKrAZ7fsCSlpmYZUkiVFdtxSAAKRG2sbEMmhS95--Y2efiMiAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBaWp0xKpXHPrOkskhEALWrGMKLnr3AAKSG2sbEMmhSxTziM73LOA4AQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBbWp0xKpPP_EfV_nHEr0Nio2pfJefAAKVG2sbEMmhS4bVN9HvXpHGAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBbmp0xKpTm_KX4WLatk9WClHecbULAAKUG2sbEMmhS1Ver5IPCK_VAQADAgADeQADPQQ"},
+    {"type": "photo", "file_id": "AgACAgIAAxkBAAIBb2p0xKogj7t5aNgdanJTMt4pNfBUAAKTG2sbEMmhS_fVwMfmZOtAAQADAgADeQADPQQ"},
+]
 # ============================================================
 # ЯЗЫКИ
 # ============================================================
