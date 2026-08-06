@@ -2,16 +2,8 @@
 """
 Конфигурация бота EmSystem by Yevgeniya Em.
 
-Бот поддерживает 3 языка интерфейса: русский, итальянский, французский.
+Бот поддерживает 3 языка интерфейса - русский, итальянский, французский.
 Все тексты, кнопки и FAQ переведены на каждый язык и лежат в словаре TEXTS.
-
-Как добавить/убрать язык:
-  1. Добавьте/удалите код языка в LANGUAGES (ключ — код, значение — подпись кнопки).
-  2. Добавьте/удалите соответствующий блок в TEXTS с тем же кодом языка.
-Все ключи внутри TEXTS["ru"], TEXTS["it"], TEXTS["fr"] должны совпадать -
-bot.py обращается к ним по этим именам.
-
-Сам код логики бота лежит в bot.py и трогать его для правки текстов не нужно.
 """
 
 import os
@@ -19,10 +11,6 @@ import os
 # ============================================================
 # ТОКЕН БОТА
 # ============================================================
-# Получить/перевыпустить токен: @BotFather -> /mybots -> @MethodEmbrowBot
-# -> API Token -> Revoke current token (если старый токен утерян/скомпрометирован)
-# Токен лучше не хранить в коде, а положить в переменную окружения BOT_TOKEN
-# (см. .env.example) либо через export BOT_TOKEN=... перед запуском.
 BOT_TOKEN = os.getenv("BOT_TOKEN", "8582789594:AAEQBRo3D6DvWNF_bMLIpn7zOUmmwzAPszw")
 
 # ============================================================
@@ -33,61 +21,40 @@ BUY_URL = "http://emsystem.me/"
 # ============================================================
 # ВИДЕО
 # ============================================================
-# ВАЖНО про видео в Telegram-ботах:
-# Обычный Bot API умеет принимать от бота файл на отправку размером
-# ДО 50 МБ. Если у видео больше — отправить его напрямую с диска бот
-# не сможет.
-#
-# Как решить (любой из вариантов):
-#   1) Сжать видео до <50 МБ - самый простой путь.
-#   2) Один раз отправить видео вручную боту, после чего Telegram сам
-#      присвоит файлу постоянный file_id. Взять update.message.video.file_id
-#      из лога (см. get_file_id.py в этом проекте) и вставить сюда.
-#      После этого бот будет мгновенно пересылать видео по file_id,
-#      без повторной загрузки.
-#   3) Поднять локальный Bot API сервер (telegram-bot-api), который
-#      снимает лимит в 50 МБ (до 2 ГБ).
-#
-# Видео сейчас общее для всех языков (одно и то же для "О курсе" и
-# для "Бесплатного урока" на всех языках). Если понадобятся отдельные
-# видео на разных языках - можно расширить структуру до словаря вида
-# {"ru": "...", "it": "...", "fr": "..."} и поменять send_course_video
-# в bot.py соответственно.
 VIDEO_ABOUT_FILE_ID = os.getenv("VIDEO_ABOUT_FILE_ID", "BAACAgIAAxkBAAPIanSS4GULisUdJIhMrhf2l0kLcGkAAnOpAAIBCKhLBKjMThbFhmI9BA")
 VIDEO_ABOUT_PATH = os.getenv("VIDEO_ABOUT_PATH", "assets/welcome.mp4")
 
 VIDEO_LESSON_FILE_ID = os.getenv("VIDEO_LESSON_FILE_ID", "BAACAgIAAxkBAAPKanSS8DlSBVt1zl6F0ync7DOvh50AAnWpAAIBCKhLduBuY83Dy0o9BA")
 VIDEO_LESSON_PATH = os.getenv("VIDEO_LESSON_PATH", "assets/welcome2.mp4")
 
+# Переменные для видео раздела Работы учеников
+# Вы можете указать один из новых file_id вторым аргументом по умолчанию
+VIDEO_WORKS_FILE_ID = os.getenv("VIDEO_WORKS_FILE_ID", "BAACAgIAAxkBAAIBw2p0vvEhDIBbOD4Qtkh7Y_64ycpSAAI0pQACEMmhS2z1Co0FswABBD0E")
+VIDEO_WORKS_PATH = os.getenv("VIDEO_WORKS_PATH", "assets/works.mp4")
+
 # ============================================================
 # ЯЗЫКИ
 # ============================================================
-# Ключ - код языка, значение - подпись кнопки на экране выбора языка.
 LANGUAGES = {
     "ru": "🇷🇺 Русский",
     "it": "🇮🇹 Italiano",
     "fr": "🇫🇷 Français",
 }
 
-# Язык по умолчанию, если что-то пошло не так и user_data пуст.
 DEFAULT_LANG = "ru"
 
 # ============================================================
 # ТЕКСТЫ ПО ЯЗЫКАМ
 # ============================================================
 TEXTS = {
-    # ------------------------------------------------------------------
-    # РУССКИЙ
-    # ------------------------------------------------------------------
     "ru": {
         "brand_header": "Система обучения EmSystem by Yevgeniya Em",
         "welcome_text": (
             "Добро пожаловать!\n\n"
             "Выберите язык, на котором Вам будет удобно проходить обучение."
         ),
-        "main_menu_header": "Главное меню:",
+        "main_menu_header": "Главное меню",
 
-        # Кнопки
         "btn_about": "🎓 О курсе",
         "btn_free_lesson": "🎁 Бесплатный урок",
         "btn_works": "🏆 Работы учеников",
@@ -99,7 +66,6 @@ TEXTS = {
         "btn_back_to_faq": "⬅ К вопросам",
         "btn_home": "🏠 Главное меню",
 
-        # Экран "О курсе"
         "about_caption": (
             "Меня зовут Евгения Эм.\n\n"
             "Я — чемпион мира, международный судья и автор метода Emsystem.me.\n\n"
@@ -109,14 +75,12 @@ TEXTS = {
             "которой уже обучились мастера из разных стран мира."
         ),
 
-        # Экран "Бесплатный урок"
         "free_lesson_intro": "Один действительно полезный урок.",
         "free_lesson_after": (
             "Если этот урок оказался для Вас полезным, представьте, сколько "
             "практических знаний Вы получите в полном курсе."
         ),
 
-        # Экран "Работы учеников"
         "student_works_text": (
             "🏆 Работы учеников\n\n"
             "• До/после\n"
@@ -125,8 +89,7 @@ TEXTS = {
             "• Фото сертификатов"
         ),
 
-        # FAQ
-        "faq_intro_text": "❓ Часто задаваемые вопросы\n\nВыберите интересующий Вас вопрос:",
+        "faq_intro_text": "❓ Часто задаваемые вопросы\n\nВыберите интересующий Вас вопрос",
         "faq_items": [
             (
                 "1. Языки курса",
@@ -150,7 +113,7 @@ TEXTS = {
                 "3. Сертификат",
                 "Получу ли я сертификат?",
                 "Да.\n\nПосле успешного завершения обучения Вы получите именной "
-                "сертификат о прохождении системы обучения «EmSystem by Yevgeniya Em».\n\n"
+                "сертификат о прохождении системы обучения EmSystem by Yevgeniya Em.\n\n"
                 "Сертификат можно использовать для пополнения профессионального "
                 "портфолио и подтверждения прохождения обучения.",
             ),
@@ -195,33 +158,25 @@ TEXTS = {
             ),
         ],
 
-        # Экран "Купить курс"
-        "buy_text": "Отличный выбор! Нажмите кнопку ниже, чтобы перейти к покупке курса:",
+        "buy_text": "Отличный выбор! Нажмите кнопку ниже, чтобы перейти к покупке курса",
 
-        # Неизвестная команда
         "unknown_command": "Пожалуйста, пользуйтесь кнопками меню. Чтобы начать заново — /start",
 
-        # Сообщения об ошибках видео
         "video_unavailable": (
-            "⚠️ Видео временно недоступно. (Не задан VIDEO_..._FILE_ID / файл не "
-            "найден по пути VIDEO_..._PATH — см. config.py)"
+            "⚠️ Видео временно недоступно."
         ),
         "video_send_failed": (
-            "⚠️ Не удалось загрузить видео. Проверьте file_id/путь и размер файла "
-            "(лимит Bot API — 50 МБ)."
+            "⚠️ Не удалось загрузить видео. Проверьте file_id или путь и размер файла."
         ),
     },
 
-    # ------------------------------------------------------------------
-    # ИТАЛЬЯНСКИЙ
-    # ------------------------------------------------------------------
     "it": {
         "brand_header": "Sistema di formazione EmSystem by Yevgeniya Em",
         "welcome_text": (
             "Benvenuto/a!\n\n"
             "Scegli la lingua in cui preferisci seguire la formazione."
         ),
-        "main_menu_header": "Menu principale:",
+        "main_menu_header": "Menu principale",
 
         "btn_about": "🎓 Il corso",
         "btn_free_lesson": "🎁 Lezione gratuita",
@@ -259,7 +214,7 @@ TEXTS = {
             "• Foto dei certificati"
         ),
 
-        "faq_intro_text": "❓ Domande frequenti\n\nScegli la domanda che ti interessa:",
+        "faq_intro_text": "❓ Domande frequenti\n\nScegli la domanda che ti interessa",
         "faq_items": [
             (
                 "1. Lingue del corso",
@@ -285,7 +240,7 @@ TEXTS = {
                 "Riceverò un certificato?",
                 "Sì.\n\nDopo aver completato con successo la formazione riceverai "
                 "un certificato nominativo di completamento del sistema di "
-                "formazione «EmSystem by Yevgeniya Em».\n\nIl certificato può "
+                "formazione EmSystem by Yevgeniya Em.\n\nIl certificato può "
                 "essere utilizzato per arricchire il tuo portfolio professionale "
                 "e per confermare la formazione seguita.",
             ),
@@ -335,31 +290,26 @@ TEXTS = {
 
         "buy_text": (
             "Ottima scelta! Premi il pulsante qui sotto per procedere "
-            "all'acquisto del corso:"
+            "all'acquisto del corso"
         ),
 
         "unknown_command": "Per favore, usa i pulsanti del menu. Per ricominciare — /start",
 
         "video_unavailable": (
-            "⚠️ Il video non è al momento disponibile. (VIDEO_..._FILE_ID non "
-            "impostato / file non trovato nel percorso VIDEO_..._PATH — vedi config.py)"
+            "⚠️ Il video non è al momento disponibile."
         ),
         "video_send_failed": (
-            "⚠️ Impossibile caricare il video. Controlla file_id/percorso e la "
-            "dimensione del file (limite Bot API — 50 MB)."
+            "⚠️ Impossibile caricare il video."
         ),
     },
 
-    # ------------------------------------------------------------------
-    # ФРАНЦУЗСКИЙ
-    # ------------------------------------------------------------------
     "fr": {
         "brand_header": "Système de formation EmSystem by Yevgeniya Em",
         "welcome_text": (
             "Bienvenue !\n\n"
             "Choisissez la langue dans laquelle vous souhaitez suivre la formation."
         ),
-        "main_menu_header": "Menu principal :",
+        "main_menu_header": "Menu principal",
 
         "btn_about": "🎓 À propos du cours",
         "btn_free_lesson": "🎁 Leçon gratuite",
@@ -398,7 +348,7 @@ TEXTS = {
             "• Photos des certificats"
         ),
 
-        "faq_intro_text": "❓ Questions fréquentes\n\nChoisissez la question qui vous intéresse :",
+        "faq_intro_text": "❓ Questions fréquentes\n\nChoisissez la question qui vous intéresse",
         "faq_items": [
             (
                 "1. Langues du cours",
@@ -426,7 +376,7 @@ TEXTS = {
                 "Recevrai-je un certificat ?",
                 "Oui.\n\nAprès avoir terminé la formation avec succès, vous "
                 "recevrez un certificat nominatif attestant la réussite du "
-                "système de formation « EmSystem by Yevgeniya Em ».\n\nCe "
+                "système de formation EmSystem by Yevgeniya Em.\n\nCe "
                 "certificat peut être utilisé pour enrichir votre portfolio "
                 "professionnel et attester de votre formation.",
             ),
@@ -478,18 +428,16 @@ TEXTS = {
 
         "buy_text": (
             "Excellent choix ! Cliquez sur le bouton ci-dessous pour procéder à "
-            "l'achat du cours :"
+            "l'achat du cours"
         ),
 
         "unknown_command": "Veuillez utiliser les boutons du menu. Pour recommencer — /start",
 
         "video_unavailable": (
-            "⚠️ La vidéo est temporairement indisponible. (VIDEO_..._FILE_ID non "
-            "défini / fichier introuvable au chemin VIDEO_..._PATH — voir config.py)"
+            "⚠️ La vidéo est temporairement indisponible."
         ),
         "video_send_failed": (
-            "⚠️ Impossible de charger la vidéo. Vérifiez le file_id/chemin et la "
-            "taille du fichier (limite Bot API — 50 Mo)."
+            "⚠️ Impossible de charger la vidéo."
         ),
     },
 }

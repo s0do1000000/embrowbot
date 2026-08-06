@@ -17,7 +17,7 @@ Telegram-бот для курса «EmSystem by Yevgeniya Em».
 "Бесплатный урок"
   -> видео -> текст-призыв -> кнопка "Перейти к покупке"
 "Работы учеников"
-  -> подборка медиа (до/после, видео, отзывы, сертификаты)
+  -> видео -> подборка медиа (до/после, видео, отзывы, сертификаты)
 "FAQ"
   -> список вопросов -> ответ -> кнопка "Назад к вопросам"
 "Купить курс" (в любом месте бота)
@@ -149,7 +149,7 @@ def faq_answer_keyboard(context: ContextTypes.DEFAULT_TYPE) -> InlineKeyboardMar
 
 async def send_course_video(chat_id, context: ContextTypes.DEFAULT_TYPE, which: str):
     """
-    which: "about" или "lesson"
+    which: "about", "lesson" или "works"
     Пробует отправить по file_id (быстро, без лимита на размер апруда),
     если file_id не задан — пробует отправить файл с диска (работает
     только если он <50 МБ либо используется локальный Bot API сервер).
@@ -157,11 +157,17 @@ async def send_course_video(chat_id, context: ContextTypes.DEFAULT_TYPE, which: 
     texts = t(context)
 
     if which == "about":
-        file_id = config.VIDEO_ABOUT_FILE_ID
-        path = config.VIDEO_ABOUT_PATH
+        file_id = getattr(config, "VIDEO_ABOUT_FILE_ID", None)
+        path = getattr(config, "VIDEO_ABOUT_PATH", None)
+    elif which == "lesson":
+        file_id = getattr(config, "VIDEO_LESSON_FILE_ID", None)
+        path = getattr(config, "VIDEO_LESSON_PATH", None)
+    elif which == "works":
+        file_id = getattr(config, "VIDEO_WORKS_FILE_ID", None)
+        path = getattr(config, "VIDEO_WORKS_PATH", None)
     else:
-        file_id = config.VIDEO_LESSON_FILE_ID
-        path = config.VIDEO_LESSON_PATH
+        file_id = None
+        path = None
 
     try:
         if file_id:
@@ -224,6 +230,7 @@ async def show_free_lesson(chat_id, context: ContextTypes.DEFAULT_TYPE):
 
 async def show_works(chat_id, context: ContextTypes.DEFAULT_TYPE):
     texts = t(context)
+    await send_course_video(chat_id, context, "works")
     await context.bot.send_message(
         chat_id=chat_id,
         text=texts["student_works_text"],
