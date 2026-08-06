@@ -1,29 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Telegram-бот для курса «EmSystem by Yevgeniya Em».
-
-Поддерживает 3 языка интерфейса: русский (ru), итальянский (it),
-французский (fr). Выбранный язык хранится в context.user_data["lang"]
-и используется для показа всех текстов и кнопок (см. config.TEXTS).
-
-Логика соответствует сценарию:
-
-/start
-  -> экран выбора языка
-язык выбран
-  -> главное меню (О курсе / Бесплатный урок / Работы учеников / FAQ / Купить курс)
-"О курсе"
-  -> видео -> текст про автора -> кнопка "Посмотреть бесплатный урок"
-"Бесплатный урок"
-  -> видео -> текст-призыв -> кнопка "Перейти к покупке"
-"Работы учеников"
-  -> видео -> подборка медиа (до/после, видео, отзывы, сертификаты)
-"FAQ"
-  -> список вопросов -> ответ -> кнопка "Назад к вопросам"
-"Купить курс" (в любом месте бота)
-  -> кнопка-ссылка на BUY_URL
-
-Запуск: см. README.md
 """
 
 import asyncio
@@ -31,7 +8,7 @@ import logging
 import os
 
 from aiohttp import web
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, InputMediaVideo, Update
 from telegram.ext import (
     Application,
     CallbackQueryHandler,
@@ -53,12 +30,10 @@ logger = logging.getLogger(__name__)
 # ============================================================
 
 def get_lang(context: ContextTypes.DEFAULT_TYPE) -> str:
-    """Возвращает код языка пользователя, либо язык по умолчанию."""
     return context.user_data.get("lang", config.DEFAULT_LANG)
 
 
 def t(context: ContextTypes.DEFAULT_TYPE) -> dict:
-    """Возвращает словарь текстов config.TEXTS для текущего языка пользователя."""
     lang = get_lang(context)
     return config.TEXTS.get(lang, config.TEXTS[config.DEFAULT_LANG])
 
@@ -144,16 +119,10 @@ def faq_answer_keyboard(context: ContextTypes.DEFAULT_TYPE) -> InlineKeyboardMar
 
 
 # ============================================================
-# ВСПОМОГАТЕЛЬНОЕ: отправка видео с фолбэком file_id -> путь на диске
+# ВСПОМОГАТЕЛЬНОЕ: отправка одиночного видео
 # ============================================================
 
 async def send_course_video(chat_id, context: ContextTypes.DEFAULT_TYPE, which: str):
-    """
-    which: "about", "lesson" или "works"
-    Пробует отправить по file_id (быстро, без лимита на размер апруда),
-    если file_id не задан — пробует отправить файл с диска (работает
-    только если он <50 МБ либо используется локальный Bot API сервер).
-    """
     texts = t(context)
 
     if which == "about":
@@ -162,9 +131,6 @@ async def send_course_video(chat_id, context: ContextTypes.DEFAULT_TYPE, which: 
     elif which == "lesson":
         file_id = getattr(config, "VIDEO_LESSON_FILE_ID", None)
         path = getattr(config, "VIDEO_LESSON_PATH", None)
-    elif which == "works":
-        file_id = getattr(config, "VIDEO_WORKS_FILE_ID", None)
-        path = getattr(config, "VIDEO_WORKS_PATH", None)
     else:
         file_id = None
         path = None
@@ -230,7 +196,26 @@ async def show_free_lesson(chat_id, context: ContextTypes.DEFAULT_TYPE):
 
 async def show_works(chat_id, context: ContextTypes.DEFAULT_TYPE):
     texts = t(context)
-    await send_course_video(chat_id, context, "works")
+    media_items = getattr(config, "WORKS_MEDIA", [])
+
+    if media_items:
+        input_media = []
+        for item in media_items:
+            m_type = item.get("type")
+            f_id = item.get("file_id")
+            if m_type == "video":
+                input_media.append(InputMediaVideo(media=f_id))
+            elif m_type == "photo":
+                input_media.append(InputMediaPhoto(media=f_id))
+
+        chunk_size = 10
+        for i in range(0, len(input_media), chunk_size):
+            chunk = input_media[i:i + chunk_size]
+            try:
+                await context.bot.send_media_group(chat_id=chat_id, media=chunk)
+            except Exception:
+                logger.exception("Ошибка при отправке альбома работ учеников")
+
     await context.bot.send_message(
         chat_id=chat_id,
         text=texts["student_works_text"],
@@ -328,13 +313,9 @@ async def on_unknown_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 def build_application() -> Application:
     if not config.BOT_TOKEN or "ВСТАВЬТЕ_СЮДА" in config.BOT_TOKEN:
-        raise RuntimeError(
-            "Не задан токен бота. Установите переменную окружения BOT_TOKEN "
-            "или впишите токен прямо в config.py (см. README.md)."
-        )
+        raise RuntimeError("Не задан токен бота.")
 
     application = Application.builder().token(config.BOT_TOKEN).build()
-
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(on_callback))
 
@@ -342,7 +323,7 @@ def build_application() -> Application:
 
 
 # ============================================================
-# DUMMY HTTP-СЕРВЕР ДЛЯ РЕНДЕРА
+# DUMMY HTTP-СЕРВЕР И ЗАПУСК
 # ============================================================
 
 async def handle_ping(request):
