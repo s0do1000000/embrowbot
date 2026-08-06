@@ -26,9 +26,11 @@ Telegram-бот для курса «EmSystem by Yevgeniya Em».
 Запуск: см. README.md
 """
 
+import asyncio
 import logging
 import os
 
+from aiohttp import web
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
     Application,
@@ -181,8 +183,6 @@ async def send_course_video(chat_id, context: ContextTypes.DEFAULT_TYPE, which: 
 # ============================================================
 
 async def show_welcome(chat_id, context: ContextTypes.DEFAULT_TYPE):
-    # Экран выбора языка не зависит от текущего языка - показываем
-    # текст по умолчанию (RU) плюс кнопки языков.
     texts = config.TEXTS[config.DEFAULT_LANG]
     await context.bot.send_message(
         chat_id=chat_id,
@@ -224,9 +224,6 @@ async def show_free_lesson(chat_id, context: ContextTypes.DEFAULT_TYPE):
 
 async def show_works(chat_id, context: ContextTypes.DEFAULT_TYPE):
     texts = t(context)
-    # TODO: подставьте реальные file_id фото/видео работ учеников,
-    # отзывов и сертификатов через context.bot.send_media_group(...)
-    # или несколько send_photo/send_video подряд.
     await context.bot.send_message(
         chat_id=chat_id,
         text=texts["student_works_text"],
@@ -273,7 +270,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    await query.answer()  # убираем "часики" на кнопке
+    await query.answer()
     data = query.data
     chat_id = query.message.chat_id
 
@@ -337,10 +334,40 @@ def build_application() -> Application:
     return application
 
 
-def main():
+# ============================================================
+# DUMMY HTTP-СЕРВЕР ДЛЯ РЕНДЕРА
+# ============================================================
+
+async def handle_ping(request):
+    return web.Response(text="Bot is running!")
+
+
+async def start_web_server():
+    port = int(os.environ.get("PORT", 10000))
+    app_web = web.Application()
+    app_web.router.add_get("/", handle_ping)
+    runner = web.AppRunner(app_web)
+    await runner.setup()
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+    logger.info("HTTP dummy-сервер запущен на порту %s", port)
+
+
+async def main_async():
+    await start_web_server()
     application = build_application()
     logger.info("Бот запущен. Ожидание сообщений...")
-    application.run_polling(allowed_updates=Update.ALL_TYPES)
+    
+    await application.initialize()
+    await application.start()
+    await application.updater.start_polling(allowed_updates=Update.ALL_TYPES)
+
+    stop_event = asyncio.Event()
+    await stop_event.wait()
+
+
+def main():
+    asyncio.run(main_async())
 
 
 if __name__ == "__main__":
