@@ -27,9 +27,12 @@ VIDEO_ABOUT_PATH = os.getenv("VIDEO_ABOUT_PATH", "assets/welcome.mp4")
 VIDEO_LESSON_FILE_ID = os.getenv("VIDEO_LESSON_FILE_ID", "BAACAgIAAxkBAAPKanSS8DlSBVt1zl6F0ync7DOvh50AAnWpAAIBCKhLduBuY83Dy0o9BA")
 VIDEO_LESSON_PATH = os.getenv("VIDEO_LESSON_PATH", "assets/welcome2.mp4")
 
-# Переменные для видео раздела Работы учеников
-# Вы можете указать один из новых file_id вторым аргументом по умолчанию
-VIDEO_WORKS_FILE_ID = os.getenv("VIDEO_WORKS_FILE_ID", "BAACAgIAAxkBAAIBw2p0vvEhDIBbOD4Qtkh7Y_64ycpSAAI0pQACEMmhS2z1Co0FswABBD0E")
+# Список file_id для раздела "Работы учеников"
+VIDEO_WORKS_FILE_IDS = [
+    "BAACAgIAAxkBAAIBamp0xKppSI1rZxFZYSvHO44ic4aOAALtqwACAQioS8f37phu3na7PQQ",
+    "BAACAgIAAxkBAAIBa2p0xKpudDQiB5g4WmE2k4wIvRwQAALuqwACAQioS116B1VdD_FXPQQ",
+    "BAACAgIAAxkBAAIBbGp0xKqQo_TNgLYxzHVuD-dnln8RAALvqwACAQioS28Zo_BoTZKlPQQ",
+]
 VIDEO_WORKS_PATH = os.getenv("VIDEO_WORKS_PATH", "assets/works.mp4")
 
 # ============================================================
