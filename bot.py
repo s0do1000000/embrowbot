@@ -31,7 +31,13 @@ context.user_data["lang"] и используется для показа все
 import logging
 import os
 
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    InputMediaPhoto,
+    InputMediaVideo,
+    Update,
+)
 from telegram.ext import (
     Application,
     CallbackQueryHandler,
@@ -118,12 +124,31 @@ def buy_keyboard(context: ContextTypes.DEFAULT_TYPE) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(buttons)
 
 
-def works_footer_keyboard(context: ContextTypes.DEFAULT_TYPE) -> InlineKeyboardMarkup:
+def works_menu_keyboard(context: ContextTypes.DEFAULT_TYPE) -> InlineKeyboardMarkup:
     texts = t(context)
     buttons = [
+        [InlineKeyboardButton(texts["btn_works_before_after"], callback_data="works:before_after:0")],
+        [InlineKeyboardButton(texts["btn_works_reviews"], callback_data="works:reviews:0")],
+        [InlineKeyboardButton(texts["btn_works_certificates"], callback_data="works:certificates:0")],
+        [InlineKeyboardButton(texts["btn_works_videos"], callback_data="works:videos:0")],
         [InlineKeyboardButton(texts["btn_buy"], callback_data="menu:buy")],
         [InlineKeyboardButton(texts["btn_main_menu"], callback_data="menu:root")],
     ]
+    return InlineKeyboardMarkup(buttons)
+
+
+def works_category_footer_keyboard(
+    context: ContextTypes.DEFAULT_TYPE, category: str, next_offset: int = None
+) -> InlineKeyboardMarkup:
+    texts = t(context)
+    buttons = []
+    if next_offset is not None:
+        buttons.append(
+            [InlineKeyboardButton(texts["btn_works_more"], callback_data=f"works:{category}:{next_offset}")]
+        )
+    buttons.append([InlineKeyboardButton(texts["btn_works"], callback_data="menu:works")])
+    buttons.append([InlineKeyboardButton(texts["btn_buy"], callback_data="menu:buy")])
+    buttons.append([InlineKeyboardButton(texts["btn_main_menu"], callback_data="menu:root")])
     return InlineKeyboardMarkup(buttons)
 
 
@@ -229,15 +254,75 @@ async def show_free_lesson(chat_id, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def show_works(chat_id, context: ContextTypes.DEFAULT_TYPE):
+    """Меню раздела: показывает 4 кнопки-категории, ничего не заваливает разом."""
     texts = t(context)
-    # TODO: подставьте реальные file_id фото/видео работ учеников,
-    # отзывов и сертификатов через context.bot.send_media_group(...)
-    # или несколько send_photo/send_video подряд.
     await context.bot.send_message(
         chat_id=chat_id,
         text=texts["student_works_text"],
-        reply_markup=works_footer_keyboard(context),
+        reply_markup=works_menu_keyboard(context),
     )
+
+
+async def show_works_category(chat_id, context: ContextTypes.DEFAULT_TYPE, category: str, offset: int):
+    """
+    Отправляет очередную порцию медиа выбранной категории (до
+    config.WORKS_PHOTOS_PAGE_SIZE штук за раз), с кнопкой "Показать ещё",
+    если в категории остались ещё элементы.
+    """
+    texts = t(context)
+    cat_data = config.WORKS_CATEGORIES.get(category)
+    if not cat_data:
+        logger.warning("Неизвестная категория работ: %s", category)
+        return
+
+    items = cat_data["items"]
+    media_type = cat_data["type"]
+    page_size = config.WORKS_PHOTOS_PAGE_SIZE
+    chunk = items[offset:offset + page_size]
+    remaining_after = items[offset + page_size:]
+    next_offset = offset + page_size if remaining_after else None
+
+    intro_key = f"works_{category}_intro"
+    if offset == 0 and intro_key in texts:
+        await context.bot.send_message(chat_id=chat_id, text=texts[intro_key])
+
+    if not chunk:
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text=texts["works_photos_done"],
+            reply_markup=works_category_footer_keyboard(context, category, next_offset=None),
+        )
+        return
+
+    try:
+        if len(chunk) == 1:
+            f_id = chunk[0]
+            if media_type == "video":
+                await context.bot.send_video(chat_id=chat_id, video=f_id, supports_streaming=True)
+            else:
+                await context.bot.send_photo(chat_id=chat_id, photo=f_id)
+        else:
+            media_group = [
+                InputMediaVideo(media=f_id) if media_type == "video" else InputMediaPhoto(media=f_id)
+                for f_id in chunk
+            ]
+            await context.bot.send_media_group(chat_id=chat_id, media=media_group)
+    except Exception:
+        logger.exception("Ошибка при отправке медиа категории %s", category)
+        await context.bot.send_message(chat_id=chat_id, text=texts["video_send_failed"])
+
+    if next_offset is not None:
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text=texts["works_continue_prompt"],
+            reply_markup=works_category_footer_keyboard(context, category, next_offset=next_offset),
+        )
+    else:
+        await context.bot.send_message(
+            chat_id=chat_id,
+            text=texts["works_photos_done"],
+            reply_markup=works_category_footer_keyboard(context, category, next_offset=None),
+        )
 
 
 async def show_faq_list(chat_id, context: ContextTypes.DEFAULT_TYPE):
@@ -327,6 +412,17 @@ async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if data == "menu:language":
         await show_language_select(chat_id, context)
+        return
+
+    if data.startswith("works:"):
+        parts = data.split(":")
+        if len(parts) == 3:
+            _, category, offset_str = parts
+            try:
+                offset = int(offset_str)
+            except ValueError:
+                offset = 0
+            await show_works_category(chat_id, context, category, offset)
         return
 
     if data.startswith("faq:"):

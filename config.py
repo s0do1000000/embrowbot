@@ -60,6 +60,75 @@ VIDEO_LESSON_FILE_ID = os.getenv("VIDEO_LESSON_FILE_ID", "BAACAgIAAxkBAAPKanSS8D
 VIDEO_LESSON_PATH = os.getenv("VIDEO_LESSON_PATH", "assets/welcome2.mp4")
 
 # ============================================================
+# МЕДИА ДЛЯ РАЗДЕЛА "РАБОТЫ УЧЕНИКОВ"
+# ============================================================
+# Фото/видео разбиты по вкладкам (До/после, Отзывы, Сертификаты, Видео).
+# Внутри каждой вкладки фото выдаются порциями (по WORKS_PHOTOS_PAGE_SIZE
+# штук за раз) с кнопкой "Показать ещё", чтобы не заваливать клиента
+# всеми фото разом.
+WORKS_PHOTOS_PAGE_SIZE = 10
+
+WORKS_VIDEOS = [
+    "BAACAgIAAxkBAAIBamp0xKppSI1rZxFZYSvHO44ic4aOAALtqwACAQioS8f37phu3na7PQQ",
+    "BAACAgIAAxkBAAIBa2p0xKpudDQiB5g4WmE2k4wIvRwQAALuqwACAQioS116B1VdD_FXPQQ",
+    "BAACAgIAAxkBAAIBbGp0xKqQo_TNgLYxzHVuD-dnln8RAALvqwACAQioS28Zo_BoTZKlPQQ",
+]
+
+# 33 фото поровну на 3 категории: 11 / 11 / 11
+WORKS_PHOTOS_BEFORE_AFTER = [
+    "AgACAgIAAxkBAAIBWGp0xJ_Rhr93kAmfQJfWSxwegd82AAKEG2sbEMmhS0HDKnNJyWFKAQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBWWp0xJ-e4-13IirMvMSR06PBHibnAAJ0G2sbEMmhS9f8U6rzqb7ZAQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBWmp0xJ8-iBNFpVc5WeqjGsYvp_lEAAJ1G2sbEMmhS9jFYWUZhHhfAQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBW2p0xJ8Jb-SEh-p1CaMgaiI2_3AlAAJ2G2sbEMmhS7bkBIx9nF76AQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBSmp0xJyCnhtFzLXgkGAzP-4fB-rKAAJ3G2sbEMmhSzii6ou30dSDAQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBS2p0xJwIEcApAoDgomiei9Bbxe4kAAJ4G2sbEMmhSyg7aut8CKOHAQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBTGp0xJxquyE4WOWQ1NXNX62pMC5pAAJ5G2sbEMmhS-8-W5ewBo0CAQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBTWp0xJxFmdBqVur_8rmlKqp_aKcEAAJ6G2sbEMmhSxCL2ni-zm9jAQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBTmp0xJzX3xIknRj_eQTkba1uB2T-AAJ7G2sbEMmhS2YxRxh613OHAQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBT2p0xJyzP646VB1fltnVIrtcuH6HAAJ8G2sbEMmhS-HSBbaufrtOAQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBUGp0xJwYgCO0anE1vlOePFZkBzQbAAJ9G2sbEMmhSzpWO54nafYuAQADAgADeQADPQQ",
+]
+
+WORKS_PHOTOS_REVIEWS = [
+    "AgACAgIAAxkBAAIBUWp0xJwmcaB7qPGxbA_4Cktlkkx0AAJ-G2sbEMmhS06RBDmC9Ww-AQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBU2p0xJzcdKqA2HNoZPUzpsJkpUQeAAJ_G2sbEMmhSyOghOsl3pdeAQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBVGp0xJ9v8zZjOkq2pOF0kjVmO6ZCAAKAG2sbEMmhS8pXeY9QrTJUAQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBVWp0xJ8AAURhARQ79pBQtoSYxiDiWQACgRtrGxDJoUsdgdOJB2VV_QEAAwIAA3kAAz0E",
+    "AgACAgIAAxkBAAIBVmp0xJ9I2DUar44v5OSwWWVfF22oAAKCG2sbEMmhS4ztVZl_PiR9AQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBV2p0xJ8f-kZr1-oEAeQkBoStEggZAAKDG2sbEMmhS7jc8vPiFI6bAQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBXGp0xJ8r07TSpQbHyk63PUU3pPxLAAKFG2sbEMmhS3y1Z1YQzdY-AQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBXWp0xJ_HtVFSOMQhQfmmnmnT8NwdAAKGG2sbEMmhSz2j23jX13xVAQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBXmp0xKFoaC_Syh5qJ_SdWzqfepkzAAKHG2sbEMmhSzG8f6DNSvI1AQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBX2p0xKE2aEWyPBFrFXMmJa_fI9-2AAKIG2sbEMmhS97E38RzhAABlAEAAwIAA3kAAz0E",
+    "AgACAgIAAxkBAAIBYGp0xKFOJhGXH5wdtlJWGbRcXPjzAAKJG2sbEMmhS6PS95g5Dj2wAQADAgADeQADPQQ",
+]
+
+WORKS_PHOTOS_CERTIFICATES = [
+    "AgACAgIAAxkBAAIBYWp0xKHEr8TFnf6p3G0wht2zWTupAAKKG2sbEMmhS2ewhPRkZji2AQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBYmp0xKE1WemAOdBB895OkrUtpRaFAAKLG2sbEMmhSzOtrkekMzlxAQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBY2p0xKH_k468nD9godZ3C1nGwMRVAAKMG2sbEMmhS8w9x3G2uhBeAQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBZGp0xKHpDkfx8OyqFA2Isx4pVUHdAAKNG2sbEMmhSzOEhTEo8FkAAQEAAwIAA3kAAz0E",
+    "AgACAgIAAxkBAAIBZWp0xKEGZuatU06J-8b7Cjt3qUGhAAKOG2sbEMmhS81JqOnk09oQAQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBZmp0xKE2UgWhs5ZSEaaFQUHWwrr9AAKPG2sbEMmhSyM5llZ-EoPGAQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBZ2p0xKHdRVO3rw9E6yo7F5Ji8W3oAAKQG2sbEMmhS7VdWd8hbftIAQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBaGp0xKrAZ7fsCSlpmYZUkiVFdtxSAAKRG2sbEMmhS95--Y2efiMiAQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBaWp0xKpXHPrOkskhEALWrGMKLnr3AAKSG2sbEMmhSxTziM73LOA4AQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBbWp0xKpPP_EfV_nHEr0Nio2pfJefAAKVG2sbEMmhS4bVN9HvXpHGAQADAgADeQADPQQ",
+    "AgACAgIAAxkBAAIBbmp0xKpTm_KX4WLatk9WClHecbULAAKUG2sbEMmhS1Ver5IPCK_VAQADAgADeQADPQQ",
+]
+
+# Категории для меню "Работы учеников".
+# key: код категории (используется в callback_data works:<key>:<offset>)
+# type: "photo" или "video"
+# items: список file_id
+WORKS_CATEGORIES = {
+    "before_after": {"type": "photo", "items": WORKS_PHOTOS_BEFORE_AFTER},
+    "reviews": {"type": "photo", "items": WORKS_PHOTOS_REVIEWS},
+    "certificates": {"type": "photo", "items": WORKS_PHOTOS_CERTIFICATES},
+    "videos": {"type": "video", "items": WORKS_VIDEOS},
+}
+
+# ============================================================
 # ЯЗЫКИ
 # ============================================================
 # Ключ - код языка, значение - подпись кнопки на экране выбора языка.
@@ -122,11 +191,21 @@ TEXTS = {
         # Экран "Работы учеников"
         "student_works_text": (
             "🏆 Работы учеников\n\n"
-            "• До/после\n"
-            "• Видео\n"
-            "• Отзывы\n"
-            "• Фото сертификатов"
+            "Здесь собраны примеры до/после, отзывы, сертификаты выпускниц "
+            "и видео с процессом работы.\n\n"
+            "Выберите, что хотите посмотреть:"
         ),
+        "btn_works_before_after": "🔄 До/после",
+        "btn_works_reviews": "💬 Отзывы",
+        "btn_works_certificates": "📜 Сертификаты",
+        "btn_works_videos": "🎥 Видео",
+        "btn_works_more": "➡ Показать ещё",
+        "works_before_after_intro": "🔄 Примеры работ до/после:",
+        "works_reviews_intro": "💬 Отзывы наших учениц:",
+        "works_certificates_intro": "📜 Сертификаты выпускниц:",
+        "works_videos_intro": "🎥 Несколько видео с процессом работы:",
+        "works_photos_done": "Это все фото в этой категории 🙂",
+        "works_continue_prompt": "Хотите посмотреть ещё?",
 
         # FAQ
         "faq_intro_text": "❓ Часто задаваемые вопросы\n\nВыберите интересующий Вас вопрос:",
@@ -258,11 +337,21 @@ TEXTS = {
 
         "student_works_text": (
             "🏆 Lavori delle allieve\n\n"
-            "• Prima/dopo\n"
-            "• Video\n"
-            "• Recensioni\n"
-            "• Foto dei certificati"
+            "Qui trovi esempi di prima/dopo, recensioni, certificati delle "
+            "diplomate e video del processo di lavoro.\n\n"
+            "Scegli cosa vuoi vedere:"
         ),
+        "btn_works_before_after": "🔄 Prima/dopo",
+        "btn_works_reviews": "💬 Recensioni",
+        "btn_works_certificates": "📜 Certificati",
+        "btn_works_videos": "🎥 Video",
+        "btn_works_more": "➡ Mostra altro",
+        "works_before_after_intro": "🔄 Esempi di lavori prima/dopo:",
+        "works_reviews_intro": "💬 Recensioni delle nostre allieve:",
+        "works_certificates_intro": "📜 Certificati delle diplomate:",
+        "works_videos_intro": "🎥 Alcuni video del processo di lavoro:",
+        "works_photos_done": "Sono tutte le foto di questa categoria 🙂",
+        "works_continue_prompt": "Vuoi vederne altre?",
 
         "faq_intro_text": "❓ Domande frequenti\n\nScegli la domanda che ti interessa:",
         "faq_items": [
@@ -399,11 +488,22 @@ TEXTS = {
 
         "student_works_text": (
             "🏆 Travaux des élèves\n\n"
-            "• Avant/après\n"
-            "• Vidéos\n"
-            "• Avis\n"
-            "• Photos des certificats"
+            "Vous trouverez ici des exemples avant/après, des avis, des "
+            "certificats des diplômées et des vidéos du processus de "
+            "travail.\n\n"
+            "Choisissez ce que vous voulez voir :"
         ),
+        "btn_works_before_after": "🔄 Avant/après",
+        "btn_works_reviews": "💬 Avis",
+        "btn_works_certificates": "📜 Certificats",
+        "btn_works_videos": "🎥 Vidéos",
+        "btn_works_more": "➡ Voir plus",
+        "works_before_after_intro": "🔄 Exemples de travaux avant/après :",
+        "works_reviews_intro": "💬 Avis de nos élèves :",
+        "works_certificates_intro": "📜 Certificats des diplômées :",
+        "works_videos_intro": "🎥 Quelques vidéos du processus de travail :",
+        "works_photos_done": "Ce sont toutes les photos de cette catégorie 🙂",
+        "works_continue_prompt": "Voulez-vous en voir plus ?",
 
         "faq_intro_text": "❓ Questions fréquentes\n\nChoisissez la question qui vous intéresse :",
         "faq_items": [
@@ -548,11 +648,21 @@ TEXTS = {
         # "Student works" screen
         "student_works_text": (
             "🏆 Student works\n\n"
-            "• Before/after\n"
-            "• Videos\n"
-            "• Reviews\n"
-            "• Certificate photos"
+            "Here you'll find before/after examples, reviews, graduate "
+            "certificates, and videos of the work process.\n\n"
+            "Choose what you'd like to see:"
         ),
+        "btn_works_before_after": "🔄 Before/after",
+        "btn_works_reviews": "💬 Reviews",
+        "btn_works_certificates": "📜 Certificates",
+        "btn_works_videos": "🎥 Videos",
+        "btn_works_more": "➡ Show more",
+        "works_before_after_intro": "🔄 Before/after examples:",
+        "works_reviews_intro": "💬 Reviews from our students:",
+        "works_certificates_intro": "📜 Graduate certificates:",
+        "works_videos_intro": "🎥 A few videos of the work process:",
+        "works_photos_done": "That's all the photos in this category 🙂",
+        "works_continue_prompt": "Want to see more?",
 
         # FAQ
         "faq_intro_text": "❓ Frequently asked questions\n\nChoose a question you're interested in:",
