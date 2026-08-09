@@ -1,14 +1,37 @@
 # -*- coding: utf-8 -*-
 """
 Telegram-бот для курса «EmSystem by Yevgeniya Em».
+
+Поддерживает 4 языка интерфейса: русский (ru), английский (en),
+итальянский (it), французский (fr). Выбранный язык хранится в
+context.user_data["lang"] и используется для показа всех текстов и
+кнопок (см. config.TEXTS). Кнопка "Язык" есть в главном меню, поэтому
+язык можно сменить в любой момент.
+
+Логика соответствует сценарию:
+
+/start
+  -> экран выбора языка
+язык выбран
+  -> главное меню (О курсе / Бесплатный урок / Работы учеников / FAQ / Купить курс)
+"О курсе"
+  -> видео -> текст про автора -> кнопка "Посмотреть бесплатный урок"
+"Бесплатный урок"
+  -> видео -> текст-призыв -> кнопка "Перейти к покупке"
+"Работы учеников"
+  -> подборка медиа (до/после, видео, отзывы, сертификаты)
+"FAQ"
+  -> список вопросов -> ответ -> кнопка "Назад к вопросам"
+"Купить курс" (в любом месте бота)
+  -> кнопка-ссылка на BUY_URL
+
+Запуск: см. README.md
 """
 
-import asyncio
 import logging
 import os
 
-from aiohttp import web
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaPhoto, InputMediaVideo, Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
     Application,
     CallbackQueryHandler,
@@ -30,10 +53,12 @@ logger = logging.getLogger(__name__)
 # ============================================================
 
 def get_lang(context: ContextTypes.DEFAULT_TYPE) -> str:
+    """Возвращает код языка пользователя, либо язык по умолчанию."""
     return context.user_data.get("lang", config.DEFAULT_LANG)
 
 
 def t(context: ContextTypes.DEFAULT_TYPE) -> dict:
+    """Возвращает словарь текстов config.TEXTS для текущего языка пользователя."""
     lang = get_lang(context)
     return config.TEXTS.get(lang, config.TEXTS[config.DEFAULT_LANG])
 
@@ -42,11 +67,14 @@ def t(context: ContextTypes.DEFAULT_TYPE) -> dict:
 # КЛАВИАТУРЫ
 # ============================================================
 
-def language_keyboard() -> InlineKeyboardMarkup:
+def language_keyboard(context: ContextTypes.DEFAULT_TYPE = None, show_back: bool = False) -> InlineKeyboardMarkup:
     buttons = [
         [InlineKeyboardButton(label, callback_data=f"lang:{code}")]
         for code, label in config.LANGUAGES.items()
     ]
+    if show_back and context is not None:
+        texts = t(context)
+        buttons.append([InlineKeyboardButton(texts["btn_main_menu"], callback_data="menu:root")])
     return InlineKeyboardMarkup(buttons)
 
 
@@ -58,6 +86,7 @@ def main_menu_keyboard(context: ContextTypes.DEFAULT_TYPE) -> InlineKeyboardMark
         [InlineKeyboardButton(texts["btn_works"], callback_data="menu:works")],
         [InlineKeyboardButton(texts["btn_faq"], callback_data="menu:faq")],
         [InlineKeyboardButton(texts["btn_buy"], callback_data="menu:buy")],
+        [InlineKeyboardButton(texts["btn_language"], callback_data="menu:language")],
     ]
     return InlineKeyboardMarkup(buttons)
 
@@ -119,21 +148,24 @@ def faq_answer_keyboard(context: ContextTypes.DEFAULT_TYPE) -> InlineKeyboardMar
 
 
 # ============================================================
-# ВСПОМОГАТЕЛЬНОЕ: отправка одиночного видео
+# ВСПОМОГАТЕЛЬНОЕ: отправка видео с фолбэком file_id -> путь на диске
 # ============================================================
 
 async def send_course_video(chat_id, context: ContextTypes.DEFAULT_TYPE, which: str):
+    """
+    which: "about" или "lesson"
+    Пробует отправить по file_id (быстро, без лимита на размер апруда),
+    если file_id не задан — пробует отправить файл с диска (работает
+    только если он <50 МБ либо используется локальный Bot API сервер).
+    """
     texts = t(context)
 
     if which == "about":
-        file_id = getattr(config, "VIDEO_ABOUT_FILE_ID", None)
-        path = getattr(config, "VIDEO_ABOUT_PATH", None)
-    elif which == "lesson":
-        file_id = getattr(config, "VIDEO_LESSON_FILE_ID", None)
-        path = getattr(config, "VIDEO_LESSON_PATH", None)
+        file_id = config.VIDEO_ABOUT_FILE_ID
+        path = config.VIDEO_ABOUT_PATH
     else:
-        file_id = None
-        path = None
+        file_id = config.VIDEO_LESSON_FILE_ID
+        path = config.VIDEO_LESSON_PATH
 
     try:
         if file_id:
@@ -155,6 +187,8 @@ async def send_course_video(chat_id, context: ContextTypes.DEFAULT_TYPE, which: 
 # ============================================================
 
 async def show_welcome(chat_id, context: ContextTypes.DEFAULT_TYPE):
+    # Экран выбора языка не зависит от текущего языка - показываем
+    # текст по умолчанию (RU) плюс кнопки языков.
     texts = config.TEXTS[config.DEFAULT_LANG]
     await context.bot.send_message(
         chat_id=chat_id,
@@ -196,26 +230,9 @@ async def show_free_lesson(chat_id, context: ContextTypes.DEFAULT_TYPE):
 
 async def show_works(chat_id, context: ContextTypes.DEFAULT_TYPE):
     texts = t(context)
-    media_items = getattr(config, "WORKS_MEDIA", [])
-
-    if media_items:
-        input_media = []
-        for item in media_items:
-            m_type = item.get("type")
-            f_id = item.get("file_id")
-            if m_type == "video":
-                input_media.append(InputMediaVideo(media=f_id))
-            elif m_type == "photo":
-                input_media.append(InputMediaPhoto(media=f_id))
-
-        chunk_size = 10
-        for i in range(0, len(input_media), chunk_size):
-            chunk = input_media[i:i + chunk_size]
-            try:
-                await context.bot.send_media_group(chat_id=chat_id, media=chunk)
-            except Exception:
-                logger.exception("Ошибка при отправке альбома работ учеников")
-
+    # TODO: подставьте реальные file_id фото/видео работ учеников,
+    # отзывов и сертификатов через context.bot.send_media_group(...)
+    # или несколько send_photo/send_video подряд.
     await context.bot.send_message(
         chat_id=chat_id,
         text=texts["student_works_text"],
@@ -243,6 +260,16 @@ async def show_faq_answer(chat_id, context: ContextTypes.DEFAULT_TYPE, index: in
     )
 
 
+async def show_language_select(chat_id, context: ContextTypes.DEFAULT_TYPE):
+    """Экран смены языка, доступный из главного меню (в любой момент)."""
+    texts = t(context)
+    await context.bot.send_message(
+        chat_id=chat_id,
+        text=texts["choose_language_text"],
+        reply_markup=language_keyboard(context, show_back=True),
+    )
+
+
 async def show_buy(chat_id, context: ContextTypes.DEFAULT_TYPE):
     texts = t(context)
     await context.bot.send_message(
@@ -262,7 +289,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
-    await query.answer()
+    await query.answer()  # убираем "часики" на кнопке
     data = query.data
     chat_id = query.message.chat_id
 
@@ -298,6 +325,10 @@ async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await show_buy(chat_id, context)
         return
 
+    if data == "menu:language":
+        await show_language_select(chat_id, context)
+        return
+
     if data.startswith("faq:"):
         index = int(data.split(":", 1)[1])
         await show_faq_answer(chat_id, context, index)
@@ -313,49 +344,23 @@ async def on_unknown_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 def build_application() -> Application:
     if not config.BOT_TOKEN or "ВСТАВЬТЕ_СЮДА" in config.BOT_TOKEN:
-        raise RuntimeError("Не задан токен бота.")
+        raise RuntimeError(
+            "Не задан токен бота. Установите переменную окружения BOT_TOKEN "
+            "или впишите токен прямо в config.py (см. README.md)."
+        )
 
     application = Application.builder().token(config.BOT_TOKEN).build()
+
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(on_callback))
 
     return application
 
 
-# ============================================================
-# DUMMY HTTP-СЕРВЕР И ЗАПУСК
-# ============================================================
-
-async def handle_ping(request):
-    return web.Response(text="Bot is running!")
-
-
-async def start_web_server():
-    port = int(os.environ.get("PORT", 10000))
-    app_web = web.Application()
-    app_web.router.add_get("/", handle_ping)
-    runner = web.AppRunner(app_web)
-    await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", port)
-    await site.start()
-    logger.info("HTTP dummy-сервер запущен на порту %s", port)
-
-
-async def main_async():
-    await start_web_server()
+def main():
     application = build_application()
     logger.info("Бот запущен. Ожидание сообщений...")
-    
-    await application.initialize()
-    await application.start()
-    await application.updater.start_polling(allowed_updates=Update.ALL_TYPES)
-
-    stop_event = asyncio.Event()
-    await stop_event.wait()
-
-
-def main():
-    asyncio.run(main_async())
+    application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 
 if __name__ == "__main__":
