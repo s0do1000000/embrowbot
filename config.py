@@ -23,7 +23,7 @@ import os
 # -> API Token -> Revoke current token (если старый токен утерян/скомпрометирован)
 # Токен лучше не хранить в коде, а положить в переменную окружения BOT_TOKEN
 # (см. .env.example) либо через export BOT_TOKEN=... перед запуском.
-BOT_TOKEN = os.getenv("BOT_TOKEN", "8582789594:AAEQBRo3D6DvWNF_bMLIpn7zOUmmwzAPszw")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "BOT_TOKEN = "8582789594:AAEQBRo3D6DvWNF_bMLIpn7zOUmmwzAPszw"")
 
 # ============================================================
 # ССЫЛКА НА ПОКУПКУ КУРСА
