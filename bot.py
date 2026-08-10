@@ -187,9 +187,6 @@ async def send_course_video(
 ):
     """
     which: "about" или "lesson"
-    Для каждого языка своё видео (config.VIDEO_*_FILE_ID_BY_LANG /
-    config.VIDEO_*_PATH_BY_LANG). Если для текущего языка file_id/путь
-    не заполнены - используется видео языка по умолчанию (config.DEFAULT_LANG).
     Пробует отправить по file_id (быстро, без лимита на размер апруда),
     если file_id не задан — пробует отправить файл с диска (работает
     только если он <50 МБ либо используется локальный Bot API сервер).
@@ -197,19 +194,13 @@ async def send_course_video(
     с видео (или к сообщению об ошибке, если видео отправить не удалось).
     """
     texts = t(context)
-    lang = get_lang(context)
 
     if which == "about":
-        file_id_map = config.VIDEO_ABOUT_FILE_ID_BY_LANG
-        path_map = config.VIDEO_ABOUT_PATH_BY_LANG
+        file_id = config.VIDEO_ABOUT_FILE_ID
+        path = config.VIDEO_ABOUT_PATH
     else:
-        file_id_map = config.VIDEO_LESSON_FILE_ID_BY_LANG
-        path_map = config.VIDEO_LESSON_PATH_BY_LANG
-
-    # Видео для текущего языка, а если для него ничего не заполнено —
-    # берём видео языка по умолчанию (чтобы не показывать пустой экран).
-    file_id = file_id_map.get(lang) or file_id_map.get(config.DEFAULT_LANG)
-    path = path_map.get(lang) or path_map.get(config.DEFAULT_LANG)
+        file_id = config.VIDEO_LESSON_FILE_ID
+        path = config.VIDEO_LESSON_PATH
 
     try:
         if file_id:
@@ -223,10 +214,10 @@ async def send_course_video(
                     chat_id=chat_id, video=f, supports_streaming=True, reply_markup=reply_markup
                 )
             return
-        logger.warning("Видео (%s, lang=%s) не найдено ни по file_id, ни по пути %s", which, lang, path)
+        logger.warning("Видео не найдено ни по file_id, ни по пути %s", path)
         await context.bot.send_message(chat_id=chat_id, text=texts["video_unavailable"], reply_markup=reply_markup)
     except Exception:
-        logger.exception("Ошибка при отправке видео (%s, lang=%s)", which, lang)
+        logger.exception("Ошибка при отправке видео (%s)", which)
         await context.bot.send_message(chat_id=chat_id, text=texts["video_send_failed"], reply_markup=reply_markup)
 
 
