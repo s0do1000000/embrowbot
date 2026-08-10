@@ -50,7 +50,6 @@ def t(context: ContextTypes.DEFAULT_TYPE) -> dict:
 # ============================================================
 
 def language_keyboard(context: ContextTypes.DEFAULT_TYPE = None, show_back: bool = False) -> InlineKeyboardMarkup:
-    # Сетка 2x2 первый ряд EN / RU, второй ряд FR / IT
     grid = [["en", "ru"], ["fr", "it"]]
     buttons = []
     for row_codes in grid:
@@ -68,7 +67,6 @@ def language_keyboard(context: ContextTypes.DEFAULT_TYPE = None, show_back: bool
 
 
 def home_keyboard(context: ContextTypes.DEFAULT_TYPE) -> InlineKeyboardMarkup:
-    """Клавиатура домашнего экрана"""
     texts = t(context)
     buttons = [
         [InlineKeyboardButton(texts["btn_watch_free_lesson"], callback_data="menu:free_lesson")],
@@ -77,7 +75,6 @@ def home_keyboard(context: ContextTypes.DEFAULT_TYPE) -> InlineKeyboardMarkup:
 
 
 def free_lesson_keyboard(context: ContextTypes.DEFAULT_TYPE) -> InlineKeyboardMarkup:
-    """Клавиатура под видео бесплатного урока"""
     texts = t(context)
     buttons = [
         [
@@ -341,11 +338,7 @@ async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await show_main_menu(chat_id, context)
         return
 
-    if data == "menu:root":
-        await show_main_menu(chat_id, context)
-        return
-
-    if data == "menu:about":
+    if data in ("menu:root", "menu:about"):
         await show_main_menu(chat_id, context)
         return
 
@@ -394,13 +387,13 @@ async def on_unknown_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 
 def build_application():
-    if not config.BOT_TOKEN or "8582789594:AAEQBRo3D6DvWNF_bMLIpn7zOUmmwzAPszw" in config.BOT_TOKEN:
+    # Проверка вызова токена без падения при совпадении со значениями по умолчанию
+    if not config.BOT_TOKEN:
         raise RuntimeError(
             "Не задан токен бота. Установите переменную окружения BOT_TOKEN "
-            "или впишите токен прямо в config.py"
+            "или впишите токен в config.py"
         )
 
-    # Настройки сетевых задержек для защиты от TimedOut на PythonAnywhere
     request = HTTPXRequest(
         connect_timeout=30.0,
         read_timeout=30.0,
