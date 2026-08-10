@@ -48,16 +48,37 @@ BUY_URL = "http://emsystem.me/"
 #   3) Поднять локальный Bot API сервер (telegram-bot-api), который
 #      снимает лимит в 50 МБ (до 2 ГБ).
 #
-# Видео сейчас общее для всех языков (одно и то же для "О курсе" и
-# для "Бесплатного урока" на всех языках). Если понадобятся отдельные
-# видео на разных языках - можно расширить структуру до словаря вида
-# {"ru": "...", "it": "...", "fr": "..."} и поменять send_course_video
-# в bot.py соответственно.
-VIDEO_ABOUT_FILE_ID = os.getenv("VIDEO_ABOUT_FILE_ID", "BAACAgIAAxkBAAPIanSS4GULisUdJIhMrhf2l0kLcGkAAnOpAAIBCKhLBKjMThbFhmI9BA")
-VIDEO_ABOUT_PATH = os.getenv("VIDEO_ABOUT_PATH", "assets/welcome.mp4")
+# Видео теперь СВОИ ДЛЯ КАЖДОГО ЯЗЫКА: словарь {код_языка: file_id или путь}.
+# Впишите сюда свои file_id для ru/en/it/fr (как получить file_id — см.
+# get_file_id.py). Если для какого-то языка file_id ещё не готов, можно
+# временно оставить пустую строку "" — тогда бот попробует взять файл
+# по пути VIDEO_ABOUT_PATH_BY_LANG, а если и его нет — покажет сообщение
+# "видео недоступно" вместо падения.
+VIDEO_ABOUT_FILE_ID_BY_LANG = {
+    "ru": os.getenv("VIDEO_ABOUT_FILE_ID_RU", "BAACAgIAAxkBAAPIanSS4GULisUdJIhMrhf2l0kLcGkAAnOpAAIBCKhLBKjMThbFhmI9BA"),
+    "en": os.getenv("VIDEO_ABOUT_FILE_ID_EN", "BAACAgIAAxkBAAIGfWp6H1djsaKxytETxyNm403BUEEUAALGoQACnU_QS5zhNnI0eAT9PQQ"),
+    "it": os.getenv("VIDEO_ABOUT_FILE_ID_IT", "BAACAgIAAxkBAAIGe2p6HxkBNqLXrBfZcKZ2GgvjJTQCAALDoQACnU_QS3Rg5DL8YVAVPQQ"),
+    "fr": os.getenv("VIDEO_ABOUT_FILE_ID_FR", "BAACAgIAAxkBAAIGeWp6HsAkjO7nNvWf6qb9UK5kIkL0AALCoQACnU_QS8FkEC8NirTGPQQ"),
+}
+VIDEO_ABOUT_PATH_BY_LANG = {
+    "ru": os.getenv("VIDEO_ABOUT_PATH_RU", "assets/welcome_ru.mp4"),
+    "en": os.getenv("VIDEO_ABOUT_PATH_EN", "assets/welcome_en.mp4"),
+    "it": os.getenv("VIDEO_ABOUT_PATH_IT", "assets/welcome_it.mp4"),
+    "fr": os.getenv("VIDEO_ABOUT_PATH_FR", "assets/welcome_fr.mp4"),
+}
 
-VIDEO_LESSON_FILE_ID = os.getenv("VIDEO_LESSON_FILE_ID", "BAACAgIAAxkBAAPKanSS8DlSBVt1zl6F0ync7DOvh50AAnWpAAIBCKhLduBuY83Dy0o9BA")
-VIDEO_LESSON_PATH = os.getenv("VIDEO_LESSON_PATH", "assets/welcome2.mp4")
+VIDEO_LESSON_FILE_ID_BY_LANG = {
+    "ru": os.getenv("VIDEO_LESSON_FILE_ID_RU", "BAACAgIAAxkBAAPKanSS8DlSBVt1zl6F0ync7DOvh50AAnWpAAIBCKhLduBuY83Dy0o9BA"),
+    "en": os.getenv("VIDEO_LESSON_FILE_ID_EN", "BAACAgIAAxkBAAIGf2p6H6ovwOoQAAH1q3jKiqJKY86NwwACyaEAAp1P0Esr05_-7xEcUj0E"),
+    "it": os.getenv("VIDEO_LESSON_FILE_ID_IT", "BAACAgIAAxkBAAIGg2p6IB6kkRwej5M6G6o65AKOfoqxAALLoQACnU_QS7suKp66LH_1PQQ"),
+    "fr": os.getenv("VIDEO_LESSON_FILE_ID_FR", "BAACAgIAAxkBAAIGgWp6H-mG2ZJUhJDKagMAAalybaKEnAACyqEAAp1P0EsoHhJO7NX_eT0E"),
+}
+VIDEO_LESSON_PATH_BY_LANG = {
+    "ru": os.getenv("VIDEO_LESSON_PATH_RU", "assets/welcome2_ru.mp4"),
+    "en": os.getenv("VIDEO_LESSON_PATH_EN", "assets/welcome2_en.mp4"),
+    "it": os.getenv("VIDEO_LESSON_PATH_IT", "assets/welcome2_it.mp4"),
+    "fr": os.getenv("VIDEO_LESSON_PATH_FR", "assets/welcome2_fr.mp4"),
+}
 
 # ============================================================
 # МЕДИА ДЛЯ РАЗДЕЛА "РАБОТЫ УЧЕНИКОВ"
