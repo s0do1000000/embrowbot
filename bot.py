@@ -11,15 +11,16 @@ context.user_data["lang"] и используется для показа все
 Логика соответствует сценарию:
 
 /start
-  -> экран выбора языка
+  -> экран выбора языка (сетка 2x2: EN/RU, FR/IT)
 язык выбран
-  -> главное меню (О курсе / Бесплатный урок / Работы учеников / FAQ / Купить курс)
-"О курсе"
-  -> видео -> текст про автора -> кнопка "Посмотреть бесплатный урок"
-"Бесплатный урок"
-  -> видео -> текст-призыв -> кнопка "Перейти к покупке"
+  -> домашний экран: видео + текст об авторе, кнопка "Посмотреть бесплатный урок"
+"Посмотреть бесплатный урок"
+  -> видео урока, под ним кнопки:
+       [Работы учеников] [FAQ]
+       [Главное меню]    [Язык]
+       [Купить курс]
 "Работы учеников"
-  -> подборка медиа (до/после, видео, отзывы, сертификаты)
+  -> подборка медиа по категориям (до/после, отзывы, сертификаты, видео)
 "FAQ"
   -> список вопросов -> ответ -> кнопка "Назад к вопросам"
 "Купить курс" (в любом месте бота)
@@ -74,43 +75,45 @@ def t(context: ContextTypes.DEFAULT_TYPE) -> dict:
 # ============================================================
 
 def language_keyboard(context: ContextTypes.DEFAULT_TYPE = None, show_back: bool = False) -> InlineKeyboardMarkup:
-    buttons = [
-        [InlineKeyboardButton(label, callback_data=f"lang:{code}")]
-        for code, label in config.LANGUAGES.items()
-    ]
+    # Сетка 2x2: первый ряд EN / RU, второй ряд FR / IT.
+    grid = [["en", "ru"], ["fr", "it"]]
+    buttons = []
+    for row_codes in grid:
+        row = [
+            InlineKeyboardButton(config.LANGUAGES[code], callback_data=f"lang:{code}")
+            for code in row_codes
+            if code in config.LANGUAGES
+        ]
+        if row:
+            buttons.append(row)
     if show_back and context is not None:
         texts = t(context)
         buttons.append([InlineKeyboardButton(texts["btn_main_menu"], callback_data="menu:root")])
     return InlineKeyboardMarkup(buttons)
 
 
-def main_menu_keyboard(context: ContextTypes.DEFAULT_TYPE) -> InlineKeyboardMarkup:
-    texts = t(context)
-    buttons = [
-        [InlineKeyboardButton(texts["btn_about"], callback_data="menu:about")],
-        [InlineKeyboardButton(texts["btn_free_lesson"], callback_data="menu:free_lesson")],
-        [InlineKeyboardButton(texts["btn_works"], callback_data="menu:works")],
-        [InlineKeyboardButton(texts["btn_faq"], callback_data="menu:faq")],
-        [InlineKeyboardButton(texts["btn_buy"], callback_data="menu:buy")],
-        [InlineKeyboardButton(texts["btn_language"], callback_data="menu:language")],
-    ]
-    return InlineKeyboardMarkup(buttons)
-
-
-def about_footer_keyboard(context: ContextTypes.DEFAULT_TYPE) -> InlineKeyboardMarkup:
+def home_keyboard(context: ContextTypes.DEFAULT_TYPE) -> InlineKeyboardMarkup:
+    """Клавиатура домашнего экрана (видео + текст об авторе): одна кнопка."""
     texts = t(context)
     buttons = [
         [InlineKeyboardButton(texts["btn_watch_free_lesson"], callback_data="menu:free_lesson")],
-        [InlineKeyboardButton(texts["btn_main_menu"], callback_data="menu:root")],
     ]
     return InlineKeyboardMarkup(buttons)
 
 
-def free_lesson_footer_keyboard(context: ContextTypes.DEFAULT_TYPE) -> InlineKeyboardMarkup:
+def free_lesson_keyboard(context: ContextTypes.DEFAULT_TYPE) -> InlineKeyboardMarkup:
+    """Клавиатура под видео бесплатного урока."""
     texts = t(context)
     buttons = [
-        [InlineKeyboardButton(texts["btn_to_buy"], callback_data="menu:buy")],
-        [InlineKeyboardButton(texts["btn_main_menu"], callback_data="menu:root")],
+        [
+            InlineKeyboardButton(texts["btn_works"], callback_data="menu:works"),
+            InlineKeyboardButton(texts["btn_faq"], callback_data="menu:faq"),
+        ],
+        [
+            InlineKeyboardButton(texts["btn_main_menu"], callback_data="menu:root"),
+            InlineKeyboardButton(texts["btn_language"], callback_data="menu:language"),
+        ],
+        [InlineKeyboardButton(texts["btn_buy"], callback_data="menu:buy")],
     ]
     return InlineKeyboardMarkup(buttons)
 
@@ -176,12 +179,19 @@ def faq_answer_keyboard(context: ContextTypes.DEFAULT_TYPE) -> InlineKeyboardMar
 # ВСПОМОГАТЕЛЬНОЕ: отправка видео с фолбэком file_id -> путь на диске
 # ============================================================
 
-async def send_course_video(chat_id, context: ContextTypes.DEFAULT_TYPE, which: str):
+async def send_course_video(
+    chat_id,
+    context: ContextTypes.DEFAULT_TYPE,
+    which: str,
+    reply_markup: InlineKeyboardMarkup = None,
+):
     """
     which: "about" или "lesson"
     Пробует отправить по file_id (быстро, без лимита на размер апруда),
     если file_id не задан — пробует отправить файл с диска (работает
     только если он <50 МБ либо используется локальный Bot API сервер).
+    Если передан reply_markup — клавиатура крепится прямо к сообщению
+    с видео (или к сообщению об ошибке, если видео отправить не удалось).
     """
     texts = t(context)
 
@@ -194,17 +204,21 @@ async def send_course_video(chat_id, context: ContextTypes.DEFAULT_TYPE, which: 
 
     try:
         if file_id:
-            await context.bot.send_video(chat_id=chat_id, video=file_id, supports_streaming=True)
+            await context.bot.send_video(
+                chat_id=chat_id, video=file_id, supports_streaming=True, reply_markup=reply_markup
+            )
             return
         if path and os.path.exists(path):
             with open(path, "rb") as f:
-                await context.bot.send_video(chat_id=chat_id, video=f, supports_streaming=True)
+                await context.bot.send_video(
+                    chat_id=chat_id, video=f, supports_streaming=True, reply_markup=reply_markup
+                )
             return
         logger.warning("Видео не найдено ни по file_id, ни по пути %s", path)
-        await context.bot.send_message(chat_id=chat_id, text=texts["video_unavailable"])
+        await context.bot.send_message(chat_id=chat_id, text=texts["video_unavailable"], reply_markup=reply_markup)
     except Exception:
         logger.exception("Ошибка при отправке видео (%s)", which)
-        await context.bot.send_message(chat_id=chat_id, text=texts["video_send_failed"])
+        await context.bot.send_message(chat_id=chat_id, text=texts["video_send_failed"], reply_markup=reply_markup)
 
 
 # ============================================================
@@ -223,34 +237,28 @@ async def show_welcome(chat_id, context: ContextTypes.DEFAULT_TYPE):
 
 
 async def show_main_menu(chat_id, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Домашний экран (показывается после выбора языка и по кнопке
+    "Главное меню"): приветственное видео + текст об авторе, под текстом
+    одна кнопка "Посмотреть бесплатный урок".
+    """
     texts = t(context)
-    await context.bot.send_message(
-        chat_id=chat_id,
-        text=f"{texts['brand_header']}\n\n{texts['main_menu_header']}",
-        reply_markup=main_menu_keyboard(context),
-    )
-
-
-async def show_about(chat_id, context: ContextTypes.DEFAULT_TYPE):
-    texts = t(context)
-    await context.bot.send_message(chat_id=chat_id, text=texts["brand_header"])
     await send_course_video(chat_id, context, "about")
     await context.bot.send_message(
         chat_id=chat_id,
         text=texts["about_caption"],
-        reply_markup=about_footer_keyboard(context),
+        reply_markup=home_keyboard(context),
     )
 
 
 async def show_free_lesson(chat_id, context: ContextTypes.DEFAULT_TYPE):
-    texts = t(context)
-    await context.bot.send_message(chat_id=chat_id, text=texts["free_lesson_intro"])
-    await send_course_video(chat_id, context, "lesson")
-    await context.bot.send_message(
-        chat_id=chat_id,
-        text=texts["free_lesson_after"],
-        reply_markup=free_lesson_footer_keyboard(context),
-    )
+    """
+    Видео бесплатного урока с клавиатурой прямо под ним:
+    [Работы учеников] [FAQ]
+    [Главное меню]    [Язык]
+    [Купить курс]
+    """
+    await send_course_video(chat_id, context, "lesson", reply_markup=free_lesson_keyboard(context))
 
 
 async def show_works(chat_id, context: ContextTypes.DEFAULT_TYPE):
@@ -391,7 +399,9 @@ async def on_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     if data == "menu:about":
-        await show_about(chat_id, context)
+        # Старый callback (кнопка "О курсе" из прошлой версии меню, может
+        # остаться в истории чата) — теперь просто ведёт на домашний экран.
+        await show_main_menu(chat_id, context)
         return
 
     if data == "menu:free_lesson":
