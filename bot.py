@@ -3,6 +3,7 @@
 Telegram-бот для курса EmSystem by Yevgeniya Em
 """
 
+import asyncio
 import logging
 import os
 
@@ -20,6 +21,7 @@ from telegram.ext import (
     ContextTypes,
 )
 from telegram.request import HTTPXRequest
+from telegram.error import TimedOut, NetworkError
 
 import config
 
@@ -28,6 +30,31 @@ logging.basicConfig(
     level=logging.INFO,
 )
 logger = logging.getLogger(__name__)
+
+
+class RetryingHTTPXRequest(HTTPXRequest):
+    """
+    Обёртка над HTTPXRequest: если PythonAnywhere временно "не достучался"
+    до api.telegram.org (ConnectTimeout / другая сетевая ошибка), пробуем
+    ещё пару раз с небольшой паузой вместо того, чтобы сразу молча терять
+    сообщение.
+    """
+
+    async def do_request(self, *args, **kwargs):
+        attempts = 3
+        last_exc = None
+        for attempt in range(1, attempts + 1):
+            try:
+                return await super().do_request(*args, **kwargs)
+            except (TimedOut, NetworkError) as exc:
+                last_exc = exc
+                logger.warning(
+                    "Сетевая ошибка при обращении к Telegram (попытка %s/%s): %s",
+                    attempt, attempts, exc,
+                )
+                if attempt < attempts:
+                    await asyncio.sleep(2)
+        raise last_exc
 
 
 # ============================================================
@@ -103,7 +130,6 @@ def works_menu_keyboard(context: ContextTypes.DEFAULT_TYPE) -> InlineKeyboardMar
     texts = t(context)
     buttons = [
         [InlineKeyboardButton(texts["btn_works_before_after"], callback_data="works:before_after:0")],
-        [InlineKeyboardButton(texts["btn_works_reviews"], callback_data="works:reviews:0")],
         [InlineKeyboardButton(texts["btn_works_certificates"], callback_data="works:certificates:0")],
         [InlineKeyboardButton(texts["btn_works_videos"], callback_data="works:videos:0")],
         [InlineKeyboardButton(texts["btn_buy"], callback_data="menu:buy")],
@@ -332,6 +358,15 @@ async def show_buy(chat_id, context: ContextTypes.DEFAULT_TYPE):
 # ХЕНДЛЕРЫ
 # ============================================================
 
+async def on_error(update: object, context: ContextTypes.DEFAULT_TYPE):
+    """
+    Глобальный обработчик ошибок: чтобы сетевые сбои (например,
+    ConnectTimeout при обращении к api.telegram.org) просто логировались,
+    а не терялись молча без единой записи в лог.
+    """
+    logger.error("Необработанная ошибка при обработке апдейта %s", update, exc_info=context.error)
+
+
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await show_welcome(update.effective_chat.id, context)
 
@@ -406,7 +441,7 @@ def build_application():
             "или впишите токен в config.py"
         )
 
-    request = HTTPXRequest(
+    request = RetryingHTTPXRequest(
         connect_timeout=30.0,
         read_timeout=30.0,
         write_timeout=30.0,
@@ -422,6 +457,7 @@ def build_application():
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CallbackQueryHandler(on_callback))
+    application.add_error_handler(on_error)
 
     return application
 
