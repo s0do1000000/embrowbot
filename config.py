@@ -27,9 +27,9 @@ BUY_URL = "http://emsystem.me/"
 # вместо пустого экрана.
 VIDEO_ABOUT_FILE_ID_BY_LANG = {
     "ru": os.getenv("VIDEO_ABOUT_FILE_ID_RU", "BAACAgIAAxkBAAPIanSS4GULisUdJIhMrhf2l0kLcGkAAnOpAAIBCKhLBKjMThbFhmI9BA"),
-    "en": os.getenv("VIDEO_ABOUT_FILE_ID_EN", ""),
-    "it": os.getenv("VIDEO_ABOUT_FILE_ID_IT", ""),
-    "fr": os.getenv("VIDEO_ABOUT_FILE_ID_FR", ""),
+    "en": os.getenv("VIDEO_ABOUT_FILE_ID_EN", "BAACAgIAAxkBAAIGfWp6H1djsaKxytETxyNm403BUEEUAALGoQACnU_QS5zhNnI0eAT9PQQ"),
+    "it": os.getenv("VIDEO_ABOUT_FILE_ID_IT", "BAACAgIAAxkBAAIGe2p6HxkBNqLXrBfZcKZ2GgvjJTQCAALDoQACnU_QS3Rg5DL8YVAVPQQ"),
+    "fr": os.getenv("VIDEO_ABOUT_FILE_ID_FR", "BAACAgIAAxkBAAIGeWp6HsAkjO7nNvWf6qb9UK5kIkL0AALCoQACnU_QS8FkEC8NirTGPQQ"),
 }
 VIDEO_ABOUT_PATH_BY_LANG = {
     "ru": os.getenv("VIDEO_ABOUT_PATH_RU", "assets/welcome_ru.mp4"),
@@ -40,9 +40,9 @@ VIDEO_ABOUT_PATH_BY_LANG = {
 
 VIDEO_LESSON_FILE_ID_BY_LANG = {
     "ru": os.getenv("VIDEO_LESSON_FILE_ID_RU", "BAACAgIAAxkBAAPKanSS8DlSBVt1zl6F0ync7DOvh50AAnWpAAIBCKhLduBuY83Dy0o9BA"),
-    "en": os.getenv("VIDEO_LESSON_FILE_ID_EN", ""),
-    "it": os.getenv("VIDEO_LESSON_FILE_ID_IT", ""),
-    "fr": os.getenv("VIDEO_LESSON_FILE_ID_FR", ""),
+    "en": os.getenv("VIDEO_LESSON_FILE_ID_EN", "BAACAgIAAxkBAAIGf2p6H6ovwOoQAAH1q3jKiqJKY86NwwACyaEAAp1P0Esr05_-7xEcUj0E"),
+    "it": os.getenv("VIDEO_LESSON_FILE_ID_IT", "BAACAgIAAxkBAAIGgWp6H-mG2ZJUhJDKagMAAalybaKEnAACyqEAAp1P0EsoHhJO7NX_eT0E"),
+    "fr": os.getenv("VIDEO_LESSON_FILE_ID_FR", "BAACAgIAAxkBAAIGg2p6IB6kkRwej5M6G6o65AKOfoqxAALLoQACnU_QS7suKp66LH_1PQQ"),
 }
 VIDEO_LESSON_PATH_BY_LANG = {
     "ru": os.getenv("VIDEO_LESSON_PATH_RU", "assets/welcome2_ru.mp4"),
